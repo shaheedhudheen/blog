@@ -5,6 +5,10 @@ const User = require("./models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const multer = require("multer");
+const uploadMiddleware = multer({ dest: "uploads/" });
+const fs = require("fs");
+const Post = require("./models/Post");
 
 const app = express();
 
@@ -78,6 +82,24 @@ app.post("/login", async (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json("ok");
+});
+
+app.post("/create", uploadMiddleware.single("file"), async (req, res) => {
+  const { originalname, path } = req?.file;
+  const parts = originalname.split(".");
+  const extension = parts[parts.length - 1];
+  const newPath = path + "." + extension;
+  fs.renameSync(path, newPath);
+
+  const { title, summary, content } = req.body;
+  const postDoc = await Post.create({
+    title,
+    summary,
+    content,
+    file: newPath,
+  });
+
+  res.json({ postDoc });
 });
 
 // ?start a web server and listen for incoming connections on a specified port

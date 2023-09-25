@@ -1,12 +1,9 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { Navigate } from "react-router-dom";
 
 const CreatePage = () => {
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-
   const modules = {
     toolbar: [
       [{ font: [] }],
@@ -22,27 +19,37 @@ const CreatePage = () => {
     ],
   };
 
-  // const formats = [
-  //   "header",
-  //   "bold",
-  //   "italic",
-  //   "underline",
-  //   "strike",
-  //   "blockquote",
-  //   "list",
-  //   "bullet",
-  //   "indent",
-  //   "link",
-  //   "image",
-  // ];
+  const [title, setTitle] = useState("");
+  const [summary, setSummary] = useState("");
+  const [content, setContent] = useState("");
+  const [files, setFiles] = useState<FileList | null>(null);
+  const [redirect, setRedirect] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const data = 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const data = new FormData();
+    data.set("title", title);
+    data.set("summary", summary);
+    data.set("content", content);
+    // data.set("files", files?.[0])
+    if (files) {
+      for (const file of files) {
+        data.set("file", file);
+      }
+    }
+    // data.set("file", files.[0]);
+
     event.preventDefault();
-    fetch("http://localhost:3000/create", {
+    const response = await fetch("http://localhost:3000/create", {
       method: "POST",
+      body: data,
     });
+
+    if (response.ok) {
+      setRedirect(true);
+    }
   };
+
+  if (redirect) return <Navigate to={"/"} />;
 
   return (
     <form className="flex flex-col space-y-2" onSubmit={handleSubmit}>
@@ -75,6 +82,7 @@ const CreatePage = () => {
         type="file"
         id="file"
         className="border-2 px-4 py-2 rounded-lg block w-full"
+        onChange={(event) => setFiles(event.target.files)}
       />
       <ReactQuill
         value={content}
