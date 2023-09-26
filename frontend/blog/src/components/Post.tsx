@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
 type postProps = {
   title: string;
@@ -13,16 +14,20 @@ type postProps = {
 
 const Post = ({ title, summary, file, createdAt, author }: postProps) => {
   return (
-    <div className="mb-8 md:grid grid-cols-blog">
+    <div className="mb-8 md:grid grid-cols-blog gap-8">
       <div className="rounded-xl overflow-hidden place-self-center">
-        <img
-          src={"http://localhost:3000/" + file}
-          alt=""
-          className="max-h-72"
-        />
+        <Link to="/posts/id">
+          <img
+            src={"http://localhost:3000/" + file}
+            alt=""
+            className="aspect-video object-cover"
+          />
+        </Link>
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl font-bold">{title}</h2>
+        <Link to={"/posts/id"}>
+          <h2 className="text-xl font-bold">{title}</h2>
+        </Link>
         <p className="space-x-2 text-sm text-gray-500 font-semibold">
           <a href="/" className="text-gray-700">
             {author.username}
