@@ -30,18 +30,18 @@ const CreatePage = () => {
     data.set("title", title);
     data.set("summary", summary);
     data.set("content", content);
-    // data.set("files", files?.[0])
+
     if (files) {
       for (const file of files) {
         data.set("file", file);
       }
     }
-    // data.set("file", files.[0]);
 
     event.preventDefault();
     const response = await fetch("http://localhost:3000/create", {
       method: "POST",
       body: data,
+      credentials: 'include'
     });
 
     if (response.ok) {

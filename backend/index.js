@@ -18,6 +18,7 @@ const secretKey = "vihawee5tui2a2v6io62hafbbwr9pv0wp";
 //!middlewares
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json()); //middleware to parse the request body as JSON
+app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(cookieParser()); //middleware for parsing cookies
 
 //connect to mongoDB
@@ -41,6 +42,14 @@ app.get("/profile", (req, res) => {
   });
 });
 
+app.get("/posts", async (req, res) => {
+  const posts = await Post.find()
+    .populate("author")
+    .sort({ createdAt: -1 })
+    .limit(20);
+  res.json(posts);
+});
+
 // ?route handler for POST requests to a specific URLs
 
 app.post("/register", async (req, res) => {
@@ -55,6 +64,8 @@ app.post("/register", async (req, res) => {
     res.status(400).json(error);
   }
 });
+
+//login and genarate token
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -80,26 +91,35 @@ app.post("/login", async (req, res) => {
   }
 });
 
+//log out and remove the token
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json("ok");
 });
 
+//create a post
 app.post("/create", uploadMiddleware.single("file"), async (req, res) => {
-  const { originalname, path } = req?.file;
+  const { originalname, path } = await req?.file;
   const parts = originalname.split(".");
   const extension = parts[parts.length - 1];
   const newPath = path + "." + extension;
+
   fs.renameSync(path, newPath);
 
-  const { title, summary, content } = req.body;
-  const postDoc = await Post.create({
-    title,
-    summary,
-    content,
-    file: newPath,
-  });
+  const { token } = req.cookies;
 
-  res.json({ postDoc });
+  jwt.verify(token, secretKey, {}, async (error, decoded) => {
+    if (error) throw error;
+
+    const { title, summary, content } = req.body;
+    const postDoc = await Post.create({
+      title,
+      summary,
+      content,
+      file: newPath,
+      author: decoded.id,
+    });
+    res.json({ postDoc });
+  });
 });
 
 // ?start a web server and listen for incoming connections on a specified port

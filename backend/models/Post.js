@@ -7,6 +7,7 @@ const PostSchema = new Schema(
     summary: String,
     content: String,
     file: String,
+    author: { type: Schema.Types.ObjectId, ref: "User" },
   },
   {
     timestamps: true,
@@ -15,4 +16,5 @@ const PostSchema = new Schema(
 
 const PostModel = model("post", PostSchema);
 
-module.exports = PostModel
+module.exports = PostModel;
+ 
