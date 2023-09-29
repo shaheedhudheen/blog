@@ -31,8 +31,12 @@ const Header = () => {
       <nav className="space-x-4 text-xl">
         {userContext?.userInfo?.username ? (
           <>
-            <Link to="/create">New Post</Link>
-            <a onClick={logout}>Log Out</a>
+            <Link to="/create" className="cursor-pointer">
+              New Post
+            </Link>
+            <a onClick={logout} className="cursor-pointer">
+              Log Out
+            </a>
           </>
         ) : (
           <>

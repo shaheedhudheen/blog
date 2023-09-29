@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { Link } from "react-router-dom";
 
 type postProps = {
+  _id: string;
   title: string;
   summary: string;
   content: string;
@@ -12,11 +13,11 @@ type postProps = {
   };
 };
 
-const Post = ({ title, summary, file, createdAt, author }: postProps) => {
+const Post = ({ title, summary, file, createdAt, author, _id }: postProps) => {
   return (
     <div className="mb-8 md:grid grid-cols-blog gap-8">
       <div className="rounded-xl overflow-hidden place-self-center">
-        <Link to="/posts/id">
+        <Link to={`/post/${_id}`}>
           <img
             src={"http://localhost:3000/" + file}
             alt=""
@@ -25,7 +26,7 @@ const Post = ({ title, summary, file, createdAt, author }: postProps) => {
         </Link>
       </div>
       <div className="space-y-2">
-        <Link to={"/posts/id"}>
+        <Link to={`/post/${_id}`}>
           <h2 className="text-xl font-bold">{title}</h2>
         </Link>
         <p className="space-x-2 text-sm text-gray-500 font-semibold">

@@ -38,15 +38,19 @@ const CreatePage = () => {
     }
 
     event.preventDefault();
-    const response = await fetch("http://localhost:3000/create", {
+    const response = await fetch("http://localhost:3000/post", {
       method: "POST",
       body: data,
-      credentials: 'include'
+      credentials: "include",
     });
 
     if (response.ok) {
       setRedirect(true);
     }
+
+    console.log(data);
+    console.log(title);
+    console.log(summary);
   };
 
   if (redirect) return <Navigate to={"/"} />;

@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 const Post = require("./models/Post");
 
@@ -20,19 +19,21 @@ app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json()); //middleware to parse the request body as JSON
 app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(cookieParser()); //middleware for parsing cookies
+const uploadMiddleware = multer({ dest: "uploads/" });
 
-//connect to mongoDB
+//!connect to mongoDB
 mongoose.connect("mongodb://127.0.0.1:27017/blog");
 
-//?allows the application or service to listen for incoming connections on any available port without having to specify a fixed port number in advance.
+//*allows the application or service to listen for incoming connections on any available port without having to specify a fixed port number in advance.
+
 const PORT = process.env.PORT || 3000;
 
-// ?route handler for GET requests to a specific URLs
+//! route handler for GET requests to a specific URLs
 app.get("/test", (req, res) => {
   res.json({ message: "testing working" });
 });
 
-//checking if logged in
+//*checking if logged in
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
   //verify token
@@ -42,6 +43,7 @@ app.get("/profile", (req, res) => {
   });
 });
 
+//*show posts to homepage
 app.get("/posts", async (req, res) => {
   const posts = await Post.find()
     .populate("author")
@@ -50,7 +52,14 @@ app.get("/posts", async (req, res) => {
   res.json(posts);
 });
 
-// ?route handler for POST requests to a specific URLs
+//*show Single post page
+app.get("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  const postInfo = await Post.findById(id).populate("author", ["username"]);
+  res.json(postInfo);
+});
+
+// !route handler for POST requests to a specific URLs
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -92,17 +101,17 @@ app.post("/login", async (req, res) => {
 });
 
 //log out and remove the token
+
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json("ok");
 });
 
 //create a post
-app.post("/create", uploadMiddleware.single("file"), async (req, res) => {
-  const { originalname, path } = await req?.file;
+app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
+  const { originalname, path } = req.file;
   const parts = originalname.split(".");
   const extension = parts[parts.length - 1];
   const newPath = path + "." + extension;
-
   fs.renameSync(path, newPath);
 
   const { token } = req.cookies;
@@ -118,7 +127,41 @@ app.post("/create", uploadMiddleware.single("file"), async (req, res) => {
       file: newPath,
       author: decoded.id,
     });
-    res.json({ postDoc });
+    res.json(req.body);
+  });
+});
+
+// !route handler for PUT requests to a specific URLs
+app.put("/post", uploadMiddleware.single("file"), (req, res) => {
+  let newPath = null;
+  if (req.file) {
+    const { originalname, path } = req.file;
+    const parts = originalname.split(".");
+    const extension = parts[parts.length - 1];
+    newPath = path + "." + extension;
+    fs.renameSync(path, newPath);
+  }
+
+  const { token } = req.cookies;
+
+  jwt.verify(token, secretKey, {}, async (error, decoded) => {
+    if (error) throw error;
+
+    const { id, title, summary, content } = req.body;
+    const postDoc = await Post.findById(id);
+    const isAuthor =
+      JSON.stringify(postDoc.author) === JSON.stringify(decoded.id);
+    if (!isAuthor) {
+      return res.status(400).json("invalid author");
+    }
+    await postDoc.updateOne({
+      title,
+      summary,
+      content,
+      file: newPath ? newPath : postDoc.file,
+      author: decoded.id,
+    });
+    res.json(postDoc);
   });
 });
 

@@ -9,6 +9,7 @@ type postType = {
   file: string;
   createdAt: string;
   author: {
+    _id: string;
     username: string;
   };
 };
@@ -19,7 +20,7 @@ const Home = () => {
     fetch("http://localhost:3000/posts").then((response) => {
       response.json().then((posts) => {
         setPosts(posts);
-        console.log(posts);
+  
       });
     });
   }, []);

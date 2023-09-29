@@ -8,6 +8,8 @@ import Home from "./components/Pages/HomePage.tsx";
 import LoginPage from "./components/Pages/LoginPage.tsx";
 import RegisterPage from "./components/Pages/RegisterPage.tsx";
 import CreatePage from "./components/Pages/CreatePage.tsx";
+import PostPage from "./components/Pages/PostPage.tsx";
+import EditPage from "./components/Pages/EditPage.tsx";
 
 //Routing
 const router = createBrowserRouter([
@@ -30,6 +32,14 @@ const router = createBrowserRouter([
       {
         path: "/create",
         element: <CreatePage />,
+      },
+      {
+        path: "/post/:id",
+        element: <PostPage />,
+      },
+      {
+        path: "/edit/:id",
+        element: <EditPage />,
       },
     ],
   },
