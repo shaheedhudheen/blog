@@ -1,7 +1,7 @@
-import { useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import { Navigate } from "react-router-dom";
+import { useState } from "react"
+import ReactQuill from "react-quill"
+import "react-quill/dist/quill.snow.css"
+import { Navigate } from "react-router-dom"
 
 const CreatePage = () => {
   const modules = {
@@ -17,43 +17,43 @@ const CreatePage = () => {
       ["link", "image", "video"],
       ["clean"],
     ],
-  };
+  }
 
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [redirect, setRedirect] = useState(false);
+  const [title, setTitle] = useState("")
+  const [summary, setSummary] = useState("")
+  const [content, setContent] = useState("")
+  const [files, setFiles] = useState<FileList | null>(null)
+  const [redirect, setRedirect] = useState(false)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    const data = new FormData();
-    data.set("title", title);
-    data.set("summary", summary);
-    data.set("content", content);
+    const data = new FormData()
+    data.set("title", title)
+    data.set("summary", summary)
+    data.set("content", content)
 
     if (files) {
       for (const file of files) {
-        data.set("file", file);
+        data.set("file", file)
       }
     }
 
-    event.preventDefault();
+    event.preventDefault()
     const response = await fetch("http://localhost:3000/post", {
       method: "POST",
       body: data,
       credentials: "include",
-    });
+    })
 
     if (response.ok) {
-      setRedirect(true);
+      setRedirect(true)
     }
 
-    console.log(data);
-    console.log(title);
-    console.log(summary);
-  };
+    console.log(data)
+    console.log(title)
+    console.log(summary)
+  }
 
-  if (redirect) return <Navigate to={"/"} />;
+  if (redirect) return <Navigate to={"/"} />
 
   return (
     <form className="flex flex-col space-y-2" onSubmit={handleSubmit}>
@@ -86,6 +86,7 @@ const CreatePage = () => {
         type="file"
         id="file"
         className="border-2 px-4 py-2 rounded-lg block w-full"
+        required
         onChange={(event) => setFiles(event.target.files)}
       />
       <ReactQuill
@@ -93,8 +94,8 @@ const CreatePage = () => {
         modules={modules}
         // formats={formats}
         onChange={(value) => {
-          setContent(value);
-          console.log(content);
+          setContent(value)
+          console.log(content)
         }}
         placeholder="Write here...."
       />
@@ -105,7 +106,7 @@ const CreatePage = () => {
         Create Post
       </button>
     </form>
-  );
-};
+  )
+}
 
-export default CreatePage;
+export default CreatePage

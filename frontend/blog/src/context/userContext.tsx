@@ -1,7 +1,7 @@
 import { createContext, useState } from "react";
 
 type AuthUser = {
-  id: string;
+  _id: string;
   username: string;
 };
 

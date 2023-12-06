@@ -1,4 +1,4 @@
- import { format } from "date-fns";
+import { format } from "date-fns";
 import { useEffect, useState, useContext } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
@@ -21,8 +21,12 @@ const PostPage = () => {
   const { id } = useParams();
   const userContext = useContext(UserContext);
 
+
+  
+  
+
   useEffect(() => {
-    fetch(`http://localhost:3000/posts/${id}`).then((response) => {
+    fetch(`http://localhost:3000/post/${id}`).then((response) => {
       response.json().then((info) => {
         setPostInfo(info);
       });
@@ -39,11 +43,16 @@ const PostPage = () => {
       <div className="flex gap-6">
         <time>{format(new Date(postInfo.createdAt), "d MM yyyy hh:mm a")}</time>
         <p>{postInfo.author.username}</p>
-      {userContext?.userInfo?.id === postInfo.author._id && (
-        <div>
-          <Link to={`/edit/${postInfo._id}`} className="px-2 py-1 border-black border rounded-lg">Edit</Link>
-        </div>
-      )}
+        {userContext?.userInfo?._id === postInfo.author._id && (
+          <div>
+            <Link
+              to={`/edit/${postInfo._id}`}
+              className="px-2 py-1 border-black border rounded-lg"
+            >
+              Edit
+            </Link>
+          </div>
+        )}
       </div>
       <img
         src={`http://localhost:3000/${postInfo.file}`}

@@ -19,7 +19,7 @@ const LoginPage = () => {
       body: JSON.stringify({ username, password }),
       credentials: "include",
     });
-    console.log(response);
+  
     if (response.ok) {
       response.json().then((userInfo) => {
         userContext?.setUserInfo(userInfo);
