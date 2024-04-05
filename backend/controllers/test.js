@@ -187,6 +187,7 @@
 // }
 
 const editPost = (req, res) => {
+
   let newPath = null
   if (req.file) {
     const { originalname, path } = req.file
@@ -195,6 +196,7 @@ const editPost = (req, res) => {
     newPath = path + "." + extension
     fs.renameSync(path, newPath)
   }
+  
   const { token } = req.cookies
   jwt.verify(token, secretKey, {}, async (error, decoded) => {
     if (error) throw error

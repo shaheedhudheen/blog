@@ -1,8 +1,27 @@
-import { useEffect, useState } from "react";
-import ReactQuill from "react-quill";
-import { Navigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react"
+import ReactQuill from "react-quill"
+import { Navigate, useParams } from "react-router-dom"
 
 const EditPage = () => {
+  const [title, setTitle] = useState("")
+  const [summary, setSummary] = useState("")
+  const [content, setContent] = useState("")
+  const [files, setFiles] = useState<FileList | null>(null)
+  const [redirect, setRedirect] = useState(false)
+
+  //get post id (params) from the current URL
+  const { id } = useParams()
+
+  const getPostInfo = async () => {
+    const response = await fetch(`http://localhost:3000/post/${id}`)
+    const { title, summary, content, files } = await response.json()
+
+    setTitle(title)
+    setSummary(summary)
+    setContent(content)
+    setFiles(files)
+  }
+
   const modules = {
     toolbar: [
       [{ font: [] }],
@@ -16,41 +35,23 @@ const EditPage = () => {
       ["link", "image", "video"],
       ["clean"],
     ],
-  };
-
-  const { id } = useParams();
-
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [redirect, setRedirect] = useState(false);
+  }
 
   useEffect(() => {
-    fetch(`http://localhost:3000/posts/${id}`).then((response) => {
-      response.json().then((postInfo) => {
-        setTitle(postInfo.title);
-        setSummary(postInfo.summary);
-        setContent(postInfo.content);
-
-        console.log(postInfo);
-      });
-    });
-  }, []);
-
-  console.log(title);
+    getPostInfo()
+  }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData();
-    data.set("title", title);
-    data.set("summary", summary);
-    data.set("content", content);
-    data.set("id", id as string);
+    event.preventDefault()
+    const data = new FormData()
+    data.set("title", title)
+    data.set("summary", summary)
+    data.set("content", content)
+    data.set("id", id as string)
 
     if (files) {
       for (const file of files) {
-        data.set("file", file);
+        data.set("file", file)
       }
     }
 
@@ -58,20 +59,15 @@ const EditPage = () => {
       method: "PUT",
       body: data,
       credentials: "include",
-    });
+    })
 
     if (response.ok) {
-      setRedirect(true);
-      console.log(response);
+      setRedirect(true)
+      console.log(response)
     }
-
-    console.log(data.entries);
-    console.log(title);
-    console.log(content);
-    console.log(summary);
   }
 
-  if (redirect) return <Navigate to={`/post/${id}`} />;
+  if (redirect) return <Navigate to={`/post/${id}`} />
 
   return (
     <form className="flex flex-col space-y-2" onSubmit={handleSubmit}>
@@ -110,8 +106,8 @@ const EditPage = () => {
         value={content}
         modules={modules}
         onChange={(value) => {
-          setContent(value);
-          console.log(content);
+          setContent(value)
+          console.log(content)
         }}
         placeholder="Write here...."
       />
@@ -122,7 +118,7 @@ const EditPage = () => {
         Update Post
       </button>
     </form>
-  );
-};
+  )
+}
 
-export default EditPage;
+export default EditPage

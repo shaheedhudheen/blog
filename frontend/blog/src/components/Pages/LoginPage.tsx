@@ -1,37 +1,38 @@
-import { useState, useContext } from "react";
-import { Navigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
+import { useState, useContext } from "react"
+import { Navigate } from "react-router-dom"
+import { UserContext } from "../../context/userContext"
 
 const LoginPage = () => {
+  
   //?state for storing username and password
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [redirect, setRedirect] = useState(false);
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [redirect, setRedirect] = useState(false)
 
-  const userContext = useContext(UserContext);
+  const userContext = useContext(UserContext)
 
   //?handle login on submit
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
     const response = await fetch("http://localhost:3000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
       credentials: "include",
-    });
-  
+    })
+
     if (response.ok) {
       response.json().then((userInfo) => {
-        userContext?.setUserInfo(userInfo);
-      });
-      setRedirect(true);
+        userContext?.setUserInfo(userInfo)
+      })
+      setRedirect(true)
     } else {
-      alert("wrong credentials");
+      alert("wrong credentials")
     }
-  };
+  }
 
   //conditional rendering
-  if (redirect) return <Navigate to={"/"} />;
+  if (redirect) return <Navigate to={"/"} />
 
   return (
     <form className=" mx-auto gap-4 max-w-lg space-y-4" onSubmit={handleLogin}>
@@ -55,7 +56,7 @@ const LoginPage = () => {
         Login
       </button>
     </form>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

@@ -1,39 +1,49 @@
-import { format } from "date-fns";
-import { useEffect, useState, useContext } from "react";
-import { Link, useParams } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
+import { format } from "date-fns"
+import { useEffect, useState, useContext } from "react"
+import { Link, Navigate, useParams } from "react-router-dom"
+import { UserContext } from "../../context/userContext"
 
 type PostProps = {
-  _id: string;
-  file: string;
-  title: string;
-  summary: string;
-  content: string;
-  createdAt: string;
+  _id: string
+  file: string
+  title: string
+  summary: string
+  content: string
+  createdAt: string
   author: {
-    username: string;
-    _id: string;
-  };
-};
+    username: string
+    _id: string
+  }
+}
 
 const PostPage = () => {
-  const [postInfo, setPostInfo] = useState<PostProps>();
-  const { id } = useParams();
-  const userContext = useContext(UserContext);
-
-
-  
-  
+  const [postInfo, setPostInfo] = useState<PostProps>()
+  const [redirect, setRedirect] = useState(false)
+  const { id } = useParams()
+  const userContext = useContext(UserContext)
 
   useEffect(() => {
     fetch(`http://localhost:3000/post/${id}`).then((response) => {
       response.json().then((info) => {
-        setPostInfo(info);
-      });
-    });
-  }, []);
+        setPostInfo(info)
+      })
+    })
+  }, [])
 
-  if (!postInfo) return;
+  if (!postInfo) return
+
+  const handleDelete = async () => {
+    const response = await fetch(`http://localhost:3000/post/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+
+    if (response.ok) {
+      setRedirect(true)
+    }
+  }
+
+  if (redirect) return <Navigate to={`/`} />
 
   return (
     <div className="flex justify-center flex-col space-y-8">
@@ -41,16 +51,22 @@ const PostPage = () => {
         {postInfo.title}
       </h1>
       <div className="flex gap-6">
-        <time>{format(new Date(postInfo.createdAt), "d MM yyyy hh:mm a")}</time>
+        <time>{format(new Date(postInfo.createdAt), "d/MM/yyyy hh:mm a")}</time>
         <p>{postInfo.author.username}</p>
         {userContext?.userInfo?._id === postInfo.author._id && (
-          <div>
+          <div className="space-x-4 flex">
             <Link
               to={`/edit/${postInfo._id}`}
               className="px-2 py-1 border-black border rounded-lg"
             >
               Edit
             </Link>
+            <button
+              className="px-2 py-1 border-black border rounded-lg"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
           </div>
         )}
       </div>
@@ -65,7 +81,7 @@ const PostPage = () => {
         className="text-xl space-y-5 font leading-10 text-justify"
       />
     </div>
-  );
-};
+  )
+}
 
-export default PostPage;
+export default PostPage

@@ -13,16 +13,6 @@ const renameAndMoveFile = (originalname, path) => {
   return newPath
 }
 
-// Function to verify user token
-const verifyUserToken = (token) => {
-  try {
-    return jwt.verify(token, secretKey)
-  } catch (error) {
-    // If the token is invalid, throw an error
-    throw new Error("Invalid token")
-  }
-}
-
 // Function to create a post document
 const createPostDocument = async (postData) => {
   return await Post.create(postData)
@@ -54,8 +44,8 @@ const createPost = async (req, res) => {
     // Rename and move uploaded file
     const newPath = renameAndMoveFile(originalname, path)
 
-    // Verify user token
-    const decoded = verifyUserToken(req.cookies.token)
+    // extract user id from token (decoded by authMiddleware)
+    const { _id } = req.user
 
     // Create a new post document
     const postDoc = await createPostDocument({
@@ -63,7 +53,7 @@ const createPost = async (req, res) => {
       summary,
       content,
       file: newPath,
-      author: decoded._id,
+      author: _id,
     })
 
     // Respond with the created post document
@@ -76,12 +66,25 @@ const createPost = async (req, res) => {
 }
 
 //! Edit Post Page
-const editPost = (req, res) => {
+const editPost = async (req, res) => {
   try {
-    // extract id from token (decoded by authMiddleware)
+    // extract user id from token (decoded by authMiddleware)
     const { _id } = req.user
 
-    console.log(req.body)
+    //extract post id from request body
+    const { id } = req.body
+
+    //get post info from id got from req.body
+    const postDoc = await Post.findById(id)
+
+    //check if it's OG author is editing by comparing user id from token and author Id from Post Document
+
+    const isAuthor = JSON.stringify(_id) === JSON.stringify(postDoc.author)
+
+    //if it's not author send appropriate response
+    if (!isAuthor) {
+      return res.status(400).json("invalid author")
+    }
 
     // Extract necessary information from the request
     const { originalname, path } = req.file
@@ -89,6 +92,47 @@ const editPost = (req, res) => {
 
     // Rename and move uploaded file
     const newPath = renameAndMoveFile(originalname, path)
+
+    // Update the Post document
+    await postDoc.updateOne({
+      title,
+      summary,
+      content,
+      file: newPath ? newPath : postDoc.file,
+      author: _id,
+    })
+
+    // Respond with the created post document
+    res.json(postDoc)
+  } catch (error) {
+    // Handle errors and send an appropriate response
+    console.error(error)
+    res.status(500).json({ error: "Internal Server Error" })
+  }
+}
+
+const deletePost = async (req, res) => {
+  try {
+    // extract user id from token (decoded by authMiddleware)
+    const { _id } = req.user
+    //extract post id from request params
+    const { id } = req.params
+
+    //get post info from id got from req.body
+    const postDoc = await Post.findById(id)
+
+    //check if it's OG author is editing by comparing user id from token and author Id from Post Document
+
+    const isAuthor = JSON.stringify(_id) === JSON.stringify(postDoc.author)
+
+    //if it's not author send appropriate response
+    if (!isAuthor) {
+      return res.status(400).json("invalid author")
+    }
+
+    const deletedPost = await Post.findByIdAndDelete(id)
+
+    res.send(deletedPost)
   } catch (error) {
     // Handle errors and send an appropriate response
     console.error(error)
@@ -101,4 +145,5 @@ module.exports = {
   singlePost,
   createPost,
   editPost,
+  deletePost,
 }

@@ -3,6 +3,7 @@ const {
   singlePost,
   createPost,
   editPost,
+  deletePost,
 } = require("../controllers/postController")
 const express = require("express")
 const multer = require("multer")
@@ -17,9 +18,11 @@ router.get("/", home)
 router.get("/:id", singlePost)
 
 //create a post
-router.post("/", upload.single("file"), createPost)
+router.post("/", authMiddleware, upload.single("file"), createPost)
 
 //edit a post
-router.put("/",authMiddleware, upload.single("file"), editPost)
+router.put("/", authMiddleware, upload.single("file"), editPost)
+
+router.delete("/:id", authMiddleware, deletePost)
 
 module.exports = router
